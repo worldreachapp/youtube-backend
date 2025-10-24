@@ -29,11 +29,11 @@ def download_video():
         
         url = f'https://www.youtube.com/watch?v={video_id}'
         
-        # Simple yt-dlp options - just get best quality with audio
+        # Use the simplest format that always works
         ydl_opts = {
-            'format': 'best',  # Just get the best format available
-            'quiet': True,
-            'no_warnings': True
+            'format': 'bestvideo+bestaudio/best',
+            'quiet': False,
+            'no_warnings': False
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
