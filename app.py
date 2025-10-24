@@ -40,28 +40,43 @@ def download_video():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             
+            # Debug: Print what we got
+            print("="*50)
+            print("INFO KEYS:", list(info.keys()))
+            print("="*50)
+            
             # Try to get URL from different possible fields
             download_url = None
             
             # Check if there's a direct URL
             if 'url' in info and info['url']:
                 download_url = info['url']
+                print("Found URL in 'url' field")
             # Check requested_formats (for merged video+audio)
             elif 'requested_formats' in info and info['requested_formats']:
-                # Return the video URL from first format
                 download_url = info['requested_formats'][0].get('url')
+                print("Found URL in 'requested_formats'")
             # Check formats array
             elif 'formats' in info and info['formats']:
-                # Find best format with url
                 for fmt in reversed(info['formats']):
                     if fmt.get('url'):
                         download_url = fmt['url']
+                        print(f"Found URL in format: {fmt.get('format_id')}")
                         break
             
+            print(f"Final download_url: {download_url[:100] if download_url else 'None'}")
+            
             if not download_url:
+                # Return debug info
                 return jsonify({
                     'success': False,
-                    'message': 'Could not extract download URL'
+                    'message': 'Could not extract download URL',
+                    'debug': {
+                        'has_url': 'url' in info,
+                        'has_formats': 'formats' in info,
+                        'has_requested_formats': 'requested_formats' in info,
+                        'keys': list(info.keys())[:20]
+                    }
                 }), 500
             
             return jsonify({
