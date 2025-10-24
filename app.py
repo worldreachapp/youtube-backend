@@ -29,14 +29,11 @@ def download_video():
         
         url = f'https://www.youtube.com/watch?v={video_id}'
         
-        # yt-dlp options - automatically merges video + audio
+        # Simple yt-dlp options - just get best quality with audio
         ydl_opts = {
-            'format': f'bestvideo[height<={quality}]+bestaudio/best[height<={quality}]/best',
-            'merge_output_format': 'mp4',
+            'format': 'best',  # Just get the best format available
             'quiet': True,
-            'no_warnings': True,
-            'extract_flat': False,
-            'outtmpl': '%(id)s.%(ext)s'
+            'no_warnings': True
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -48,7 +45,7 @@ def download_video():
                 'title': info.get('title', 'Unknown'),
                 'thumbnail': info.get('thumbnail', ''),
                 'duration': info.get('duration', 0),
-                'quality': f"{quality}p with audio",
+                'quality': 'Best available with audio',
                 'filesize': info.get('filesize', 0)
             })
             
