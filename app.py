@@ -29,19 +29,44 @@ def download_video():
         
         url = f'https://www.youtube.com/watch?v={video_id}'
         
-        # Use the simplest format that always works
+        # Get list of all available formats first
         ydl_opts = {
-            'format': 'bestvideo+bestaudio/best',
+            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
             'quiet': False,
-            'no_warnings': False
+            'no_warnings': False,
+            'merge_output_format': 'mp4'
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             
+            # Try to get URL from different possible fields
+            download_url = None
+            
+            # Check if there's a direct URL
+            if 'url' in info and info['url']:
+                download_url = info['url']
+            # Check requested_formats (for merged video+audio)
+            elif 'requested_formats' in info and info['requested_formats']:
+                # Return the video URL from first format
+                download_url = info['requested_formats'][0].get('url')
+            # Check formats array
+            elif 'formats' in info and info['formats']:
+                # Find best format with url
+                for fmt in reversed(info['formats']):
+                    if fmt.get('url'):
+                        download_url = fmt['url']
+                        break
+            
+            if not download_url:
+                return jsonify({
+                    'success': False,
+                    'message': 'Could not extract download URL'
+                }), 500
+            
             return jsonify({
                 'success': True,
-                'url': info['url'],
+                'url': download_url,
                 'title': info.get('title', 'Unknown'),
                 'thumbnail': info.get('thumbnail', ''),
                 'duration': info.get('duration', 0),
