@@ -31,11 +31,12 @@ def download_video():
         
         # yt-dlp options - automatically merges video + audio
         ydl_opts = {
-            'format': f'bestvideo[height<={quality}][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            'format': f'bestvideo[height<={quality}]+bestaudio/best[height<={quality}]/best',
             'merge_output_format': 'mp4',
             'quiet': True,
             'no_warnings': True,
-            'extract_flat': False
+            'extract_flat': False,
+            'outtmpl': '%(id)s.%(ext)s'
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
